@@ -8,10 +8,11 @@ import type { Locale } from "@/i18n/config";
 
 /** Values sent with the contact form stay in English, so enquiries read the same. */
 export const projectTypeValues = [
-  "Business Website",
-  "Landing Page",
+  "Website",
+  "E-commerce / Shopify",
   "Web Application",
-  "Website Redesign",
+  "AI & Automation",
+  "SEO & Maintenance",
   "Not sure yet",
 ] as const;
 
@@ -21,7 +22,7 @@ const en = {
   meta: {
     title: "Romano Web — We build what moves you forward",
     description:
-      "Romano Web is an independent web development and digital design studio. Thoughtful design and serious development for small and medium-sized businesses.",
+      "Romano Web is an independent web development studio. Websites, Shopify stores, custom web applications and AI automation for small and medium-sized businesses.",
     ogLocale: "en_US",
   },
   common: {
@@ -64,34 +65,47 @@ const en = {
     secondary: "Explore our work",
     scroll: "Scroll",
   },
-  marquee: ["Business Websites", "Landing Pages", "Web Applications", "Website Redesign"],
+  marquee: [
+    "Business Websites",
+    "Shopify Stores",
+    "Web Applications",
+    "SaaS",
+    "AI Chatbots",
+    "Automation",
+    "Technical SEO",
+  ],
   services: {
     label: "Services",
     note: "What we make",
-    titleA: "Four ways",
+    titleA: "Five ways",
     titleB: "to move forward.",
-    intro: "Every project is designed and developed in-house, from the first sketch to the deployed site.",
+    intro: "Every project is designed and developed in-house, from the first sketch to launch and beyond.",
     srStart: "Start a project:",
     items: [
       {
-        title: "Business Websites",
-        body: "Professional websites designed to establish credibility, communicate value, and generate business.",
-        tags: ["Multi-page sites", "Content structure", "SEO foundations"],
+        title: "Websites",
+        body: "Professional websites and focused landing pages that build credibility, communicate value, and bring in business.",
+        tags: ["Business Websites", "Landing Pages", "Custom Website Development", "Website Redesign"],
       },
       {
-        title: "Landing Pages",
-        body: "Focused, conversion-oriented pages built around specific products, campaigns, or services.",
-        tags: ["Campaigns", "Product launches", "Lead capture"],
+        title: "E-commerce",
+        body: "Online stores that are easy to manage and easy to buy from, on Shopify or built from scratch.",
+        tags: ["Shopify Store Development", "Custom Shopify Themes", "E-commerce Development", "Payment Integration"],
       },
       {
         title: "Web Applications",
-        body: "Custom digital tools and applications designed around business needs.",
-        tags: ["Dashboards", "Internal tools", "Client portals"],
+        body: "Custom software built around how your business works, from internal tools to full SaaS products.",
+        tags: ["Custom Web Applications", "SaaS Development", "CRM Systems", "Client Portals", "Booking Systems"],
       },
       {
-        title: "Website Redesign",
-        body: "Modernize outdated websites with improved design, usability, and performance.",
-        tags: ["Audit", "New design", "Rebuild"],
+        title: "AI & Automation",
+        body: "AI tools and automated workflows that save time on repetitive work and connect the systems you already use.",
+        tags: ["AI Chatbots", "Workflow Automation", "AI Business Tools", "API Integrations"],
+      },
+      {
+        title: "Care & Growth",
+        body: "Ongoing support after launch, so your site stays fast, secure, easy to find, and keeps improving.",
+        tags: ["Technical SEO", "Website Maintenance", "Continuous Development"],
       },
     ],
   },
@@ -191,7 +205,7 @@ const en = {
   contact: {
     metaTitle: "Contact",
     metaDescription:
-      "Start a project with Romano Web. Tell us about your business website, landing page, web application or redesign.",
+      "Start a project with Romano Web. Tell us about your website, online store, web application or AI automation.",
     top: ["Contact", "Start a project"],
     // The last line gets an accent full stop.
     lines: ["Let's move", "forward"],
@@ -218,7 +232,7 @@ const en = {
     budget: "Estimated budget",
     message: "Project description",
     messageHint: "Goals, timeline, links to your current site — anything useful.",
-    projectTypes: ["Business Website", "Landing Page", "Web Application", "Website Redesign", "Not sure yet"],
+    projectTypes: ["Website", "E-commerce / Shopify", "Web Application", "AI & Automation", "SEO & Maintenance", "Not sure yet"],
     budgets: ["Under $5k", "$5k – $10k", "$10k – $25k", "$25k+", "Not sure yet"],
     submit: "Send message",
     sending: "Sending…",
@@ -230,11 +244,7 @@ const en = {
     errorNotConfigured: "Our contact form isn't connected yet, so your message wasn't delivered.",
     errorNetwork: "We couldn't reach the server. Please check your connection and try again.",
     errorProvider: "Something went wrong on our side and your message wasn't delivered. Please try again.",
-    errorVerification: "We couldn't verify this submission, so it wasn't sent. Please try again.",
-    errorTooFast: "That was quick, so it wasn't sent. Please take a moment and send it again.",
-    errorExpired: "This form was open for a while, so we refreshed it. Please send your message again.",
     errorRateLimited: "You've sent several messages in a short time. Please wait a few minutes and try again.",
-    humanCheck: "Quick check that you're human",
     alsoEmail: "You can also email us directly at",
     validation: {
       name: "Please enter your name.",
@@ -254,7 +264,7 @@ const es: Dictionary = {
   meta: {
     title: "Romano Web — Construimos lo que te hace avanzar",
     description:
-      "Romano Web es un estudio independiente de desarrollo web y diseño digital. Diseño cuidadoso y desarrollo serio para pequeñas y medianas empresas.",
+      "Romano Web es un estudio independiente de desarrollo web. Sitios web, tiendas Shopify, aplicaciones web a la medida y automatización con IA para pequeñas y medianas empresas.",
     ogLocale: "es_US",
   },
   common: {
@@ -296,34 +306,47 @@ const es: Dictionary = {
     secondary: "Ver nuestro trabajo",
     scroll: "Desliza",
   },
-  marquee: ["Sitios web para negocios", "Landing pages", "Aplicaciones web", "Rediseño web"],
+  marquee: [
+    "Sitios web para negocios",
+    "Tiendas Shopify",
+    "Aplicaciones web",
+    "SaaS",
+    "Chatbots con IA",
+    "Automatización",
+    "SEO técnico",
+  ],
   services: {
     label: "Servicios",
     note: "Lo que hacemos",
-    titleA: "Cuatro formas",
+    titleA: "Cinco formas",
     titleB: "de avanzar.",
-    intro: "Cada proyecto se diseña y se desarrolla en el estudio, desde el primer boceto hasta el sitio publicado.",
+    intro: "Cada proyecto se diseña y se desarrolla en el estudio, desde el primer boceto hasta el lanzamiento y más allá.",
     srStart: "Iniciar un proyecto:",
     items: [
       {
-        title: "Sitios web para negocios",
-        body: "Sitios web profesionales diseñados para generar credibilidad, comunicar tu valor y atraer clientes.",
-        tags: ["Sitios de varias páginas", "Estructura de contenido", "Bases de SEO"],
+        title: "Sitios web",
+        body: "Sitios web profesionales y landing pages enfocadas que generan credibilidad, comunican tu valor y atraen clientes.",
+        tags: ["Sitios web para negocios", "Landing pages", "Desarrollo web a la medida", "Rediseño web"],
       },
       {
-        title: "Landing pages",
-        body: "Páginas enfocadas en la conversión, creadas para productos, campañas o servicios específicos.",
-        tags: ["Campañas", "Lanzamientos", "Captación de clientes"],
+        title: "E-commerce",
+        body: "Tiendas en línea fáciles de administrar y fáciles para comprar, en Shopify o hechas desde cero.",
+        tags: ["Tiendas Shopify", "Temas de Shopify a la medida", "Desarrollo de e-commerce", "Integración de pagos"],
       },
       {
         title: "Aplicaciones web",
-        body: "Herramientas y aplicaciones digitales hechas a la medida de las necesidades de tu negocio.",
-        tags: ["Paneles", "Herramientas internas", "Portales de clientes"],
+        body: "Software a la medida de cómo funciona tu negocio, desde herramientas internas hasta productos SaaS completos.",
+        tags: ["Aplicaciones web a la medida", "Desarrollo SaaS", "Sistemas CRM", "Portales de clientes", "Sistemas de reservas"],
       },
       {
-        title: "Rediseño web",
-        body: "Moderniza un sitio desactualizado con mejor diseño, usabilidad y rendimiento.",
-        tags: ["Auditoría", "Nuevo diseño", "Reconstrucción"],
+        title: "IA y automatización",
+        body: "Herramientas de IA y flujos automatizados que ahorran tiempo en tareas repetitivas y conectan los sistemas que ya usas.",
+        tags: ["Chatbots con IA", "Automatización de procesos", "Herramientas de IA para negocios", "Integraciones de API"],
+      },
+      {
+        title: "Soporte y crecimiento",
+        body: "Acompañamiento después del lanzamiento para que tu sitio siga rápido, seguro, fácil de encontrar y en mejora constante.",
+        tags: ["SEO técnico", "Mantenimiento web", "Desarrollo continuo"],
       },
     ],
   },
@@ -422,7 +445,7 @@ const es: Dictionary = {
   contact: {
     metaTitle: "Contacto",
     metaDescription:
-      "Inicia un proyecto con Romano Web. Cuéntanos sobre tu sitio web, landing page, aplicación web o rediseño.",
+      "Inicia un proyecto con Romano Web. Cuéntanos sobre tu sitio web, tienda en línea, aplicación web o automatización con IA.",
     top: ["Contacto", "Iniciar un proyecto"],
     lines: ["Avancemos", "juntos"],
     intro: "Cuéntanos un poco sobre tu proyecto. Te responderemos para conversar sobre cómo podemos ayudarte.",
@@ -448,7 +471,7 @@ const es: Dictionary = {
     budget: "Presupuesto estimado",
     message: "Descripción del proyecto",
     messageHint: "Objetivos, plazos, enlaces a tu sitio actual: todo lo que sea útil.",
-    projectTypes: ["Sitio web para negocio", "Landing page", "Aplicación web", "Rediseño web", "Aún no lo sé"],
+    projectTypes: ["Sitio web", "E-commerce / Shopify", "Aplicación web", "IA y automatización", "SEO y mantenimiento", "Aún no lo sé"],
     budgets: ["Menos de $5k", "$5k – $10k", "$10k – $25k", "$25k+", "Aún no lo sé"],
     submit: "Enviar mensaje",
     sending: "Enviando…",
@@ -460,11 +483,7 @@ const es: Dictionary = {
     errorNotConfigured: "Nuestro formulario de contacto aún no está conectado, así que tu mensaje no se entregó.",
     errorNetwork: "No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.",
     errorProvider: "Algo salió mal de nuestro lado y tu mensaje no se entregó. Inténtalo de nuevo.",
-    errorVerification: "No pudimos verificar este envío, así que no se mandó. Inténtalo de nuevo.",
-    errorTooFast: "Fue muy rápido, así que no se mandó. Espera un momento y vuelve a enviarlo.",
-    errorExpired: "El formulario llevaba un rato abierto, así que lo actualizamos. Vuelve a enviar tu mensaje.",
     errorRateLimited: "Enviaste varios mensajes en poco tiempo. Espera unos minutos e inténtalo de nuevo.",
-    humanCheck: "Comprobación rápida de que eres humano",
     alsoEmail: "También puedes escribirnos directamente a",
     validation: {
       name: "Escribe tu nombre.",

@@ -6,7 +6,7 @@ export const site = {
   fullName: "Romano Web — Independent Digital Studio",
   tagline: "We build what moves you forward.",
   description:
-    "Romano Web is an independent web development and digital design studio. Thoughtful design and serious development for small and medium-sized businesses.",
+    "Romano Web is an independent web development studio. Websites, Shopify stores, custom web applications and AI automation for small and medium-sized businesses.",
   owner: "Andoni Romano",
 
   // The site's address, used for canonical URLs, the sitemap and share images.
