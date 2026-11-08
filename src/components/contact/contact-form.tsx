@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import { ArrowUpRight, Check, LoaderCircle } from "lucide-react";
-import { submitContact, type ContactErrorReason } from "@/lib/contact-action";
 import {
   createContactSchema,
   readContactForm,
@@ -18,10 +17,15 @@ import { cn } from "@/lib/utils";
 type Status =
   | { kind: "idle" }
   | { kind: "success" }
-  | { kind: "error"; reason: ContactErrorReason | "network" };
+  | { kind: "error"; reason: "network" | "provider_error" };
+
+// Messages go to Netlify Forms (see public/__forms.html for the field list).
+// You find them in the Netlify dashboard under Forms, and can get each one by email.
+const NETLIFY_FORM_NAME = "contact";
+const NETLIFY_FORM_PATH = "/__forms.html";
 
 // Bots tend to submit instantly. If a person is faster than this, the form
-// just waits the difference before sending. Keep in sync with src/lib/form-guard.ts.
+// just waits the difference before sending.
 const MIN_FILL_MS = 3_000;
 
 type Copy = Dictionary["form"];
@@ -34,8 +38,8 @@ export function ContactForm({ locale, t }: { locale: Locale; t: Copy }) {
   const [touched, setTouched] = useState<Partial<Record<ContactField, boolean>>>({});
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [pending, startTransition] = useTransition();
-  // Invisible bot check (see src/lib/form-guard.ts): when the form opened and
-  // how many times the visitor typed or clicked in it.
+  // Invisible bot check: when the form opened and how many times the visitor
+  // typed or clicked in it. Bots that fail get a fake success.
   const openedAt = useRef(0);
   const interactions = useRef(0);
   useEffect(() => {
@@ -84,24 +88,44 @@ export function ContactForm({ locale, t }: { locale: Locale; t: Copy }) {
 
     setErrors({});
     setStatus({ kind: "idle" });
+    const done = () => {
+      setStatus({ kind: "success" });
+      form.reset();
+      setTouched({});
+      openedAt.current = Date.now();
+      interactions.current = 0;
+    };
+
     startTransition(async () => {
       const wait = MIN_FILL_MS - (Date.now() - openedAt.current);
       if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-      formData.set("human", `${Date.now() - openedAt.current}.${interactions.current}`);
+
+      const trap = formData.get("website");
+      const isBot = interactions.current === 0 || (typeof trap === "string" && trap.length > 0);
+      if (isBot) {
+        done();
+        return;
+      }
+
+      const d = parsed.data;
+      const body = new URLSearchParams({
+        "form-name": NETLIFY_FORM_NAME,
+        name: d.name,
+        email: d.email,
+        company: d.company ?? "",
+        projectType: d.projectType,
+        budget: d.budget ?? "",
+        message: d.message,
+        locale,
+      });
       try {
-        const res = await submitContact(formData);
-        if (res.status === "success") {
-          setStatus({ kind: "success" });
-          form.reset();
-          setTouched({});
-          openedAt.current = Date.now();
-          interactions.current = 0;
-        } else if (res.status === "invalid") {
-          setErrors(res.errors);
-          focusFirstError(res.errors);
-        } else {
-          setStatus({ kind: "error", reason: res.reason });
-        }
+        const res = await fetch(NETLIFY_FORM_PATH, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString(),
+        });
+        if (res.ok) done();
+        else setStatus({ kind: "error", reason: "provider_error" });
       } catch {
         setStatus({ kind: "error", reason: "network" });
       }
@@ -130,11 +154,9 @@ export function ContactForm({ locale, t }: { locale: Locale; t: Copy }) {
     );
   }
 
-  const errorMessages: Record<ContactErrorReason | "network", string> = {
-    not_configured: t.errorNotConfigured,
+  const errorMessages: Record<"network" | "provider_error", string> = {
     provider_error: t.errorProvider,
     network: t.errorNetwork,
-    rate_limited: t.errorRateLimited,
   };
   const errorText = status.kind === "error" ? errorMessages[status.reason] : "";
 

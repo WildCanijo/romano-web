@@ -241,10 +241,8 @@ const en = {
     successBody: "Thanks for reaching out. We'll read your note and get back to you to talk about your project.",
     another: "Send another message",
     errorTitle: "Message not sent",
-    errorNotConfigured: "Our contact form isn't connected yet, so your message wasn't delivered.",
     errorNetwork: "We couldn't reach the server. Please check your connection and try again.",
     errorProvider: "Something went wrong on our side and your message wasn't delivered. Please try again.",
-    errorRateLimited: "You've sent several messages in a short time. Please wait a few minutes and try again.",
     alsoEmail: "You can also email us directly at",
     validation: {
       name: "Please enter your name.",
@@ -480,10 +478,8 @@ const es: Dictionary = {
     successBody: "Gracias por escribirnos. Leeremos tu mensaje y te responderemos para hablar de tu proyecto.",
     another: "Enviar otro mensaje",
     errorTitle: "Mensaje no enviado",
-    errorNotConfigured: "Nuestro formulario de contacto aún no está conectado, así que tu mensaje no se entregó.",
     errorNetwork: "No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.",
     errorProvider: "Algo salió mal de nuestro lado y tu mensaje no se entregó. Inténtalo de nuevo.",
-    errorRateLimited: "Enviaste varios mensajes en poco tiempo. Espera unos minutos e inténtalo de nuevo.",
     alsoEmail: "También puedes escribirnos directamente a",
     validation: {
       name: "Escribe tu nombre.",

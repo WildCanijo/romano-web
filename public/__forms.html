@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!--
+  Netlify Forms reads this file at deploy time to learn the contact form's
+  fields. Visitors never see it: the real form (src/components/contact/contact-form.tsx)
+  posts here with JavaScript. Keep the field names in sync with that form.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Contact form</title>
+  </head>
+  <body>
+    <form name="contact" data-netlify="true" netlify-honeypot="website" hidden>
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="text" name="company" />
+      <input type="text" name="projectType" />
+      <input type="text" name="budget" />
+      <textarea name="message"></textarea>
+      <input type="text" name="locale" />
+      <input type="text" name="website" />
+    </form>
+  </body>
+</html>

@@ -15,31 +15,26 @@ npm start        # serve the production build
 | --- | --- |
 | Real business email (shown on the site) | `src/config/site.ts` → `email` |
 | Site address (canonical URLs, Open Graph) | Automatic on Netlify; override with `NEXT_PUBLIC_SITE_URL` |
-| Contact form delivery | Add your Resend key to `RESEND_API_KEY` in `.env.local` (see Contact form below) |
+| Contact form delivery | Netlify Forms, turned on in the Netlify dashboard (see Contact form below) |
 | Concept projects → real case studies | `src/components/home/work.tsx` (`projects` array) |
 | "Taking on new projects" label in the hero | `hero.meta` in `src/i18n/dictionaries.ts` (both languages) |
 
 ### Contact form
 
-Messages go to `CONTACT_TO_EMAIL` (set in `.env.local`) through [Resend](https://resend.com).
+Messages go to [Netlify Forms](https://docs.netlify.com/manage/forms/setup/). No API key or email service needed.
 
-**Setup (about 5 minutes):**
-1. Sign up at resend.com **with the same email as `CONTACT_TO_EMAIL`**.
-2. Create an API key (API Keys → Create) and paste it into `RESEND_API_KEY` in `.env.local`.
-3. Restart the dev server. Submit the form; the email arrives from `onboarding@resend.dev`, and replying goes straight to the visitor.
+**Setup (once, in the Netlify dashboard):**
+1. Forms → Enable form detection, then redeploy. A form called `contact` appears.
+2. Forms → Form notifications → Add notification → Email notification, and enter the address that should receive messages.
 
-`onboarding@resend.dev` can only deliver to your own Resend account email, which is all a contact form needs. To send from your own address, verify a domain in Resend and change `CONTACT_FROM_EMAIL`.
+`public/__forms.html` tells Netlify which fields the form has. The real form (`src/components/contact/contact-form.tsx`) posts to it with JavaScript, so keep the field names in both files in sync. Sending only works on the deployed site, not with `npm run dev`.
 
-When you deploy, add the same variables in your hosting provider's settings.
+**Protection:** no visible challenge or captcha.
+- Hidden honeypot field (`website`), also checked by Netlify.
+- The visitor must type or click in the form, and sending waits until it has been open at least 3 seconds. Bots that fail get a fake success.
+- Netlify's own spam filter.
 
-**Protection** (`src/lib/form-guard.ts`):
-No visible challenge or captcha. The checks are invisible:
-- Hidden honeypot field for bots.
-- JavaScript proof: the form sends how long it was open and whether the visitor typed or clicked. Bots that skip the page, never interact, or submit within 3 seconds get a fake success. If a person is faster than 3 seconds, the form just waits the difference.
-- Rate limit: 5 messages per visitor every 10 minutes (in memory, per server).
-- Next.js rejects server action calls from other origins.
-
-Validation runs in the browser and again on the server (`src/lib/contact-action.ts`, schema in `src/lib/contact-schema.ts`). The form only shows success when the email provider accepted the message.
+Validation runs in the browser (schema in `src/lib/contact-schema.ts`).
 
 ## Languages
 
@@ -54,7 +49,7 @@ The site is in English and Spanish:
 - URLs per page are in `src/i18n/config.ts` (`paths`).
 - Each language has its own root layout (`src/app/(en)` and `src/app/(es)`), so `<html lang>` is correct for each one. Switching language is a full page load.
 - The EN / ES switch in the nav links to the same page in the other language. Pages declare `hreflang` alternates, and the sitemap lists both languages.
-- Contact form errors are translated. Enquiries are always delivered in English, with a "Site language" line.
+- Contact form errors are translated. Project type and budget values are always sent in English, with a `locale` field for the visitor's language.
 - Unknown URLs show a bilingual 404 (`src/app/global-not-found.tsx`, which needs the `experimental.globalNotFound` flag in `next.config.ts`).
 
 ## Structure
@@ -72,7 +67,7 @@ src/
     contact/            contact form
     layout/             nav, footer, wordmark, grid guides
     motion/             Reveal, Magnetic, Parallax
-  lib/                  form schema, delivery, utils
+  lib/                  form schema, utils
 ```
 
 ## Design system
