@@ -1,67 +1,39 @@
 import "server-only";
-import { createHmac, timingSafeEqual } from "node:crypto";
 
 /**
- * Checks that a contact form submission came from a real visitor on this site.
+ * Invisible spam checks for the contact form. Visitors never see a challenge.
  *
- * 1. Signed form token. The page asks the server for a token when the form
- *    loads. It's an HMAC signature of the time it was issued, made with
- *    CONTACT_FORM_SECRET. Forged, tampered or missing tokens are rejected.
- * 2. Timing. Submissions less than 3 seconds after the form loaded, or with a
- *    token older than 2 hours, are rejected. Bots tend to submit instantly.
+ * 1. Honeypot. A hidden "website" field that people never fill in.
+ * 2. JavaScript proof. The form's script adds a "human" field with how long the
+ *    form was open and how many times the visitor typed or clicked in it.
+ *    Bots that post without running the page, fill it in instantly, or never
+ *    interact with it fail this check.
  * 3. Rate limit. At most 5 submissions per visitor (IP) every 10 minutes.
- * 4. Cloudflare Turnstile (optional). A human check that runs when
- *    NEXT_PUBLIC_TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY are both set.
  *
+ * Failed checks 1 and 2 get a fake success, so bots learn nothing.
  * Next.js also rejects server action requests whose Origin doesn't match the
  * site's host, so other websites can't post to this form.
  */
 
-const MIN_AGE_MS = 3_000;
-const MAX_AGE_MS = 2 * 60 * 60 * 1000;
+// Keep in sync with MIN_FILL_MS in src/components/contact/contact-form.tsx.
+const MIN_FILL_MS = 3_000;
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 
-function secret() {
-  const value = process.env.CONTACT_FORM_SECRET;
-  if (value && value.length >= 32) return value;
-  if (process.env.NODE_ENV === "production") {
-    // Without a secret, tokens can't be trusted: refuse every submission.
-    throw new Error("CONTACT_FORM_SECRET is missing or shorter than 32 characters.");
-  }
-  // Local development only.
-  return "dev-only-secret-do-not-use-in-production-0000";
+export function looksHuman(formData: FormData) {
+  const trap = formData.get("website");
+  if (typeof trap === "string" && trap.length > 0) return false;
+
+  const proof = formData.get("human");
+  if (typeof proof !== "string") return false;
+  const match = /^(\d+)\.(\d+)$/.exec(proof);
+  if (!match) return false;
+  const [, elapsed, interactions] = match;
+  return Number(elapsed) >= MIN_FILL_MS && Number(interactions) > 0;
 }
 
-function sign(payload: string) {
-  return createHmac("sha256", secret()).update(payload).digest("base64url");
-}
-
-export function createFormToken(now = Date.now()) {
-  const issued = String(now);
-  return `${issued}.${sign(issued)}`;
-}
-
-export type TokenCheck = "ok" | "invalid" | "too_fast" | "expired";
-
-export function verifyFormToken(token: unknown, now = Date.now()): TokenCheck {
-  if (typeof token !== "string") return "invalid";
-  const [issued, signature] = token.split(".");
-  if (!issued || !signature || !/^\d+$/.test(issued)) return "invalid";
-
-  const expected = Buffer.from(sign(issued));
-  const given = Buffer.from(signature);
-  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return "invalid";
-
-  const age = now - Number(issued);
-  if (age < MIN_AGE_MS) return "too_fast";
-  if (age > MAX_AGE_MS) return "expired";
-  return "ok";
-}
-
-// In-memory rate limit. Good for a single server. On serverless hosting each
-// instance keeps its own count, so treat it as a speed bump; Turnstile is the
-// stronger check there.
+// In-memory rate limit. On serverless hosting each instance keeps its own
+// count, so treat it as a speed bump.
 const hits = new Map<string, number[]>();
 
 export function rateLimit(key: string, now = Date.now()) {
@@ -81,33 +53,10 @@ export function rateLimit(key: string, now = Date.now()) {
   return true;
 }
 
-export function turnstileEnabled() {
-  return Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && process.env.TURNSTILE_SECRET_KEY);
-}
-
-export async function verifyTurnstile(token: unknown, ip?: string) {
-  if (!turnstileEnabled()) return true;
-  if (typeof token !== "string" || !token) return false;
-  try {
-    const body = new URLSearchParams({ secret: process.env.TURNSTILE_SECRET_KEY!, response: token });
-    if (ip) body.set("remoteip", ip);
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      body,
-      cache: "no-store",
-    });
-    const data = (await res.json()) as { success?: boolean };
-    return data.success === true;
-  } catch (err) {
-    console.error("[contact] Turnstile verification failed:", err);
-    return false;
-  }
-}
-
 /** Best-effort visitor IP from proxy headers. */
 export function clientIp(h: Headers) {
   return (
-    h.get("cf-connecting-ip") ??
+    h.get("x-nf-client-connection-ip") ??
     h.get("x-real-ip") ??
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     "unknown"

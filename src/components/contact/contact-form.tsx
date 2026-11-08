@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
 import { ArrowUpRight, Check, LoaderCircle } from "lucide-react";
-import { issueFormToken, submitContact, type ContactErrorReason } from "@/lib/contact-action";
-import { Turnstile, type TurnstileHandle } from "@/components/contact/turnstile";
+import { submitContact, type ContactErrorReason } from "@/lib/contact-action";
 import {
   createContactSchema,
   readContactForm,
@@ -21,7 +20,9 @@ type Status =
   | { kind: "success" }
   | { kind: "error"; reason: ContactErrorReason | "network" };
 
-const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+// Bots tend to submit instantly. If a person is faster than this, the form
+// just waits the difference before sending. Keep in sync with src/lib/form-guard.ts.
+const MIN_FILL_MS = 3_000;
 
 type Copy = Dictionary["form"];
 
@@ -33,18 +34,16 @@ export function ContactForm({ locale, t }: { locale: Locale; t: Copy }) {
   const [touched, setTouched] = useState<Partial<Record<ContactField, boolean>>>({});
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [pending, startTransition] = useTransition();
-  const [formToken, setFormToken] = useState("");
-  const turnstileRef = useRef<TurnstileHandle>(null);
-
-  // A signed token proves the submission comes from this page (see src/lib/form-guard.ts).
-  const refreshToken = useCallback(() => {
-    issueFormToken()
-      .then(setFormToken)
-      .catch(() => setFormToken(""));
-  }, []);
+  // Invisible bot check (see src/lib/form-guard.ts): when the form opened and
+  // how many times the visitor typed or clicked in it.
+  const openedAt = useRef(0);
+  const interactions = useRef(0);
   useEffect(() => {
-    refreshToken();
-  }, [refreshToken]);
+    openedAt.current = Date.now();
+  }, []);
+  const countInteraction = () => {
+    interactions.current += 1;
+  };
 
   const validateField = (field: ContactField) => {
     if (!formRef.current) return;
@@ -86,25 +85,26 @@ export function ContactForm({ locale, t }: { locale: Locale; t: Copy }) {
     setErrors({});
     setStatus({ kind: "idle" });
     startTransition(async () => {
+      const wait = MIN_FILL_MS - (Date.now() - openedAt.current);
+      if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+      formData.set("human", `${Date.now() - openedAt.current}.${interactions.current}`);
       try {
         const res = await submitContact(formData);
         if (res.status === "success") {
           setStatus({ kind: "success" });
           form.reset();
           setTouched({});
-          refreshToken();
+          openedAt.current = Date.now();
+          interactions.current = 0;
         } else if (res.status === "invalid") {
           setErrors(res.errors);
           focusFirstError(res.errors);
         } else {
           setStatus({ kind: "error", reason: res.reason });
-          if (res.reason === "expired" || res.reason === "verification_failed") refreshToken();
         }
       } catch {
         setStatus({ kind: "error", reason: "network" });
       }
-      // Turnstile tokens are single-use.
-      turnstileRef.current?.reset();
       requestAnimationFrame(() => statusRef.current?.focus());
     });
   };
@@ -134,17 +134,22 @@ export function ContactForm({ locale, t }: { locale: Locale; t: Copy }) {
     not_configured: t.errorNotConfigured,
     provider_error: t.errorProvider,
     network: t.errorNetwork,
-    verification_failed: t.errorVerification,
-    too_fast: t.errorTooFast,
-    expired: t.errorExpired,
     rate_limited: t.errorRateLimited,
   };
   const errorText = status.kind === "error" ? errorMessages[status.reason] : "";
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} noValidate aria-busy={pending} className="flex flex-col gap-8">
+    <form
+      ref={formRef}
+      onSubmit={onSubmit}
+      onKeyDown={countInteraction}
+      onPointerDown={countInteraction}
+      onInput={countInteraction}
+      noValidate
+      aria-busy={pending}
+      className="flex flex-col gap-8"
+    >
       <input type="hidden" name="locale" value={locale} />
-      <input type="hidden" name="formToken" value={formToken} />
       <p className="label-mono text-muted">
         {t.requiredBefore} <span className="text-accent">*</span> {t.requiredAfter}
       </p>
@@ -236,13 +241,6 @@ export function ContactForm({ locale, t }: { locale: Locale; t: Copy }) {
           <input type="text" name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
-
-      {turnstileSiteKey ? (
-        <div className="flex flex-col gap-3">
-          <span className="label-mono text-muted">{t.humanCheck}</span>
-          <Turnstile ref={turnstileRef} siteKey={turnstileSiteKey} language={locale} />
-        </div>
-      ) : null}
 
       {status.kind === "error" ? (
         <div

@@ -33,12 +33,11 @@ Messages go to `CONTACT_TO_EMAIL` (set in `.env.local`) through [Resend](https:/
 When you deploy, add the same variables in your hosting provider's settings.
 
 **Protection** (`src/lib/form-guard.ts`):
-- Signed form token (HMAC with `CONTACT_FORM_SECRET`). Forged or missing tokens are rejected.
-- Timing: submissions under 3 seconds after load, or with a token over 2 hours old, are rejected.
-- Rate limit: 5 messages per visitor every 10 minutes (in memory, per server).
+No visible challenge or captcha. The checks are invisible:
 - Hidden honeypot field for bots.
+- JavaScript proof: the form sends how long it was open and whether the visitor typed or clicked. Bots that skip the page, never interact, or submit within 3 seconds get a fake success. If a person is faster than 3 seconds, the form just waits the difference.
+- Rate limit: 5 messages per visitor every 10 minutes (in memory, per server).
 - Next.js rejects server action calls from other origins.
-- Optional Cloudflare Turnstile human check: set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY`.
 
 Validation runs in the browser and again on the server (`src/lib/contact-action.ts`, schema in `src/lib/contact-schema.ts`). The form only shows success when the email provider accepted the message.
 
